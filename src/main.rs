@@ -86,6 +86,32 @@ impl Set {
             self.len -= 1;
         }
     }
+
+    fn exists(&self, item: u8) -> bool {
+        // keep track of current pointer
+        let mut curr = &self.rep;
+        for i in (0..8).rev() {
+            // extract i'th bit
+            let indexer = 1 << i;
+            let dir = if (item & indexer) == 0 { 0 } else { 1 };
+
+            // do nothing if we hit a dead-end
+            if let &Tree::Empty(_) = curr {
+                return false;
+            }
+
+            // have pointer follow path
+            if let &Tree::Node(ref l, ref r) = curr {
+                curr = if dir == 0 { l } else { r };
+            }
+        }
+
+        // check if current element is in tree
+        if let &Tree::Empty(true) = curr {
+            return true;
+        }
+        return false;
+    }
 }
 
 fn main() {
@@ -113,4 +139,10 @@ fn main() {
     c.add(8);
     c.delete(32);
     c.print();
+
+    println!("--------");
+    println!("32 exists in set?: {}", c.exists(32));
+    println!("8 exists in set?: {}", c.exists(8));
+    println!("0 exists in set?: {}", c.exists(0));
+    println!("7 exists in set?: {}", c.exists(7));
 }
